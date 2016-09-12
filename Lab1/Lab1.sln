@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 14
+VisualStudioVersion = 14.0.25420.1
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SMS-spam", "SMS-spam\SMS-spam.csproj", "{CD9B9CC8-5CA3-49FE-9533-92B75AC304C6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Teamwork", "Teamwork\Teamwork.csproj", "{073C98B7-9811-415D-B7D3-A0C72F53D83F}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{CD9B9CC8-5CA3-49FE-9533-92B75AC304C6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CD9B9CC8-5CA3-49FE-9533-92B75AC304C6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CD9B9CC8-5CA3-49FE-9533-92B75AC304C6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CD9B9CC8-5CA3-49FE-9533-92B75AC304C6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{073C98B7-9811-415D-B7D3-A0C72F53D83F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{073C98B7-9811-415D-B7D3-A0C72F53D83F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{073C98B7-9811-415D-B7D3-A0C72F53D83F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{073C98B7-9811-415D-B7D3-A0C72F53D83F}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

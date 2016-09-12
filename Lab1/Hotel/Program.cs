@@ -13,27 +13,24 @@ namespace Hotel
             {
                 result[i, j] = number;
                 number++;
-                Console.WriteLine(i);
-                if (j + 1 == n)
+                if (i + 1 == n)
                 {
-                    Console.WriteLine("+"+i);
-                    start_pos--;
-                    j = start_pos;
-                    i = 0;
-                }
-                else if (i + 1 == n)
-                {
-                    Console.WriteLine("-"+i);
                     start_pos++;
                     i = start_pos;
                     j = 0;
+                }
+                else if (j + 1 == n)
+                {
+                    start_pos--;
+                    j = start_pos;
+                    i = 0;
                 }
                 else 
                 {
                     j++;
                     i++;
                 }
-            } while (i != n-1 & j != 0);
+            } while (number!=n*n+1);
             for (i = 0; i<n; i++)
             {
                 for (j = 0; j < n; j++)

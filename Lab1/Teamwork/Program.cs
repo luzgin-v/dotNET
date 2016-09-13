@@ -6,8 +6,8 @@ namespace Teamwork
     {
         static void Main()
         {
-            int n = int.Parse(Console.ReadLine());
-            string[] numbers = Console.ReadLine().Split(' ');
+            int n = int.Parse(Console.ReadLine()); //количество чисел
+            string[] numbers = Console.ReadLine().Split(' '); // Васины числа
             for (int i = 0, sum = 0; i < n; i++)
             {
                 sum++;

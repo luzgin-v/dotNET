@@ -5,15 +5,16 @@ namespace SMS_spam
 {
     class Program
     {
-        static void Main(string[] args)
+        static void Main()
         {
-            string line = Console.ReadLine();
-            int cost = 0;
+            string line = Console.ReadLine(); //исходный рекламный слоган
+            int cost = 0; //стоимость
             for (int i = 0; i < line.Length; i++)
             {
-                if ((int)line[i] > 96)
+                if (line[i] > 96)
                 {
-                    cost += ((int)line[i] - 97) % 3 + 1;
+                    //расчет стоимости буквенных символов
+                    cost += (line[i] - 97) % 3 + 1;
                 }
                 else if (line[i] == ' ' || line[i] == '.')
                 {

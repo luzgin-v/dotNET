@@ -51,11 +51,13 @@ namespace sportmaster_parser
                 htmldoc.DocumentNode.SelectNodes("//div[@class=\"sm-category__item \"]/h2/a");
             Console.WriteLine("\n");
             //ПРОВЕРИТЬ НА null
-            Console.WriteLine("{0,7} | {1}\n--------------------------------------------------------------", "ID", "Название товара");
+            Console.WriteLine("{0,8} | {1}\n--------------------------------------------------------------", "ID", "Название товара");
             foreach (HtmlNode Product in Products)
             {
-                string id = Product.Attributes["href"].Value.Substring(Product.Attributes["href"].Value.IndexOf("/product/") + 9, 7);
-                Console.WriteLine("{0} | {1}",id, Product.InnerText);
+                int StartSymbolID = Product.Attributes["href"].Value.IndexOf("/product/") + 9;
+                int EndSymbolID = Product.Attributes["href"].Value.Substring(StartSymbolID).IndexOf("/");
+                string id = Product.Attributes["href"].Value.Substring(StartSymbolID, EndSymbolID);
+                Console.WriteLine("{0, 8} | {1}",id, Product.InnerText);
             }
             Console.WriteLine("\n");
         }

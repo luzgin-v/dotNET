@@ -1,7 +1,10 @@
 ﻿using System;
+using System.Linq;
 using System.Net;
 using System.Text;
 using HtmlAgilityPack;
+using LiteDB;
+
 
 namespace sportmaster_parser
 {
@@ -9,6 +12,7 @@ namespace sportmaster_parser
     {
         static void Main(string[] args)
         {
+
             //GetProductFromID("1779410");
             //GetProductsWithSearch("гиря");
             Console.WriteLine();
@@ -83,40 +87,70 @@ namespace sportmaster_parser
 
         private static void GetProductFromID(string id)
         {
-            StringBuilder url = new StringBuilder("http://www.sportmaster.ru/product/");
-            url.Append(id);
-            url.ToString();
+            using (var db = new LiteDatabase(@"cache.db"))
+            {
+                var Products = db.GetCollection<Product>("products");
+                var result = Products.Find(x => x.SportmasterID.Equals(id));
+                if (result.Any())
+                {
+                    Console.WriteLine("\nИнформация о товаре получена из кэша");
+                    Products.FindOne(x => x.SportmasterID.Equals(id)).WriteProductInfo();
+                }
+                else
+                {
+                    StringBuilder url = new StringBuilder("http://www.sportmaster.ru/product/");
+                    url.Append(id);
+                    url.ToString();
+                    try
+                    {
+                        HtmlWeb web = new HtmlWeb();
+                        HtmlDocument htmldoc = web.Load(url.ToString());
+                        HtmlNode NameProductNode =
+                            htmldoc.DocumentNode.SelectSingleNode("/html/body/div[4]/div[2]/div[2]/div[3]/h1");
+                        HtmlNode ManufacturerProductNode =
+                            htmldoc.DocumentNode.SelectSingleNode("/ html/body/div[4]/div[2]/div[2]/div[2]/div/div[1]/a/img");
+                        HtmlNode PriceProductNode =
+                            htmldoc.DocumentNode.SelectSingleNode(
+                                "/html/body/div[4]/div[2]/div[2]/div[3]/div[3]/div/div/div/div/text()");
 
-            try
-            {
-                HtmlWeb web = new HtmlWeb();
-                HtmlDocument htmldoc = web.Load(url.ToString());
-                HtmlNode NameProductNode =
-                    htmldoc.DocumentNode.SelectSingleNode("/html/body/div[4]/div[2]/div[2]/div[3]/h1");
-                HtmlNode ManufacturerProductNode =
-                    htmldoc.DocumentNode.SelectSingleNode("/ html/body/div[4]/div[2]/div[2]/div[2]/div/div[1]/a/img");
-                HtmlNode PriceProductNode =
-                    htmldoc.DocumentNode.SelectSingleNode(
-                        "/html/body/div[4]/div[2]/div[2]/div[3]/div[3]/div/div/div/div/text()");
+                        Console.WriteLine("\n");
 
-                Console.WriteLine("\n");
-                Console.WriteLine("{0, 15}: {1}", "Наименование", NameProductNode.InnerText);
-                Console.WriteLine("{0, 15}: {1}", "Производитель", ManufacturerProductNode.Attributes["alt"].Value);
-                Console.WriteLine("{0, 15}: {1}", "Цена", PriceProductNode.InnerText.Replace(",", ""));
+                        var NewProduct = new Product()
+                        {
+                            SportmasterID = id,
+                            Name = NameProductNode.InnerText,
+                            Manufacturer = ManufacturerProductNode.Attributes["alt"].Value,
+                            Price = PriceProductNode.InnerText.Replace(",", "")
+                        };
+                        Products.Insert(NewProduct);
+                        NewProduct.WriteProductInfo();
+                    }
+                    catch (WebException ex)
+                    {
+                        Console.WriteLine("\nПроблемы с доступом к сайту");
+                    }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine("\nВозникла проблема при попытке извлечь информацию по ID: \"{0}\"", id);
+                    }
+                }
             }
-            catch (WebException ex)
-            {
-                Console.WriteLine("\nПроблемы с доступом к сайту");
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine("\nВозникла проблема при попытке извлечь информацию по ID: \"{0}\"", id);
-            }
-            finally
-            {
-                Console.WriteLine("\n");
-            }
+            Console.WriteLine("\n");
         }
+    }
 
+    public class Product
+    {
+        public string SportmasterID { get; set; }
+        public string Name { get; set; }
+        public string Manufacturer { get; set; }
+        public string Price { get; set; }
+
+        public void WriteProductInfo()
+        {
+            Console.WriteLine("{0, 15}: {1}", "Наименование", this.Name);
+            Console.WriteLine("{0, 15}: {1}", "Производитель", this.Manufacturer);
+            Console.WriteLine("{0, 15}: {1}", "Цена", this.Price);
+        }
     }
 }

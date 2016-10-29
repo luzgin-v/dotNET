@@ -1,10 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Data.Entity;
 using System.Linq;
 using System.Net;
-using System.Text;
 using HtmlAgilityPack;
 using LiteDB;
 
@@ -15,10 +11,8 @@ namespace sportmaster_parser
     {
         static void Main(string[] args)
         {
-
             //GetProductFromID("1779410");
             //GetProductsWithSearch("гиря");
-            Console.WriteLine();
             while (true)
             {
                 Console.WriteLine("Выберите пункт из меню: ");
@@ -31,7 +25,7 @@ namespace sportmaster_parser
                 {
                     case "1":
                         Console.Write("Введите ID: ");
-                        GetProductFromID(Console.ReadLine());
+                        GetProductFromId(Console.ReadLine());
                         break;
                     case "2":
                         Console.Write("Введите поисковый запрос: ");
@@ -52,34 +46,27 @@ namespace sportmaster_parser
 
         private static void GetManufacturersList()
         {
-            using (var db = new ProductsContext())
+            using (var Db = new ProductContext())
             {
-                var ManufacturersList = db.Manufacturers;
-                if (ManufacturersList != null)
+                var ManufacturersList = Db.Manufacturers.Select(m => m.ManufacturerName).ToList();
+                if (ManufacturersList.Any())
                 {
                     Console.WriteLine("\nСписок производителей:");
-                    int i = 0;
-                    Dictionary<int, string> ManufacturersDict = new Dictionary<int, string>();
-                    foreach (var Manufacturer in ManufacturersList)
+                    for (int I = 0; I < ManufacturersList.Count; I++)
                     {
-                        i++;
-                        ManufacturersDict.Add(i, Manufacturer.ManufacturerName);
-                    }
-                    foreach (var Key in ManufacturersDict.Keys)
-                    {
-                        Console.WriteLine("{0}. {1}", Key, ManufacturersDict[Key]);
+                        Console.WriteLine("{0}. {1}", I + 1, ManufacturersList[I]);
                     }
                     Console.Write("\nДалее можно посмотреть все товары данного производителя. Для этого выберите номер производителя: ");
                     int Number;
                     if (Int32.TryParse(Console.ReadLine(), out Number))
                     {
-                        if (!ManufacturersDict.ContainsKey(Number))
+                        if ((Number + 1 > 0) &(Number - 1 < ManufacturersList.Count))
                         {
-                            Console.WriteLine("Key \"doc\" is not found.");
+                            GetProductsOfManufacturer(ManufacturersList[Number-1]);
                         }
                         else
                         {
-                            GetProductsOfManufacturer(ManufacturersDict[Number]);
+                            Console.WriteLine("Введенное значение некорректно.");
                         }
                         Console.WriteLine();
                     }
@@ -96,15 +83,14 @@ namespace sportmaster_parser
             }
         }
 
-        private static void GetProductsOfManufacturer(string NameManufacturer)
+        private static void GetProductsOfManufacturer(string nameManufacturer)
         {
-            using (var db = new ProductsContext())
+            using (var Db = new ProductContext())
             {
-                var Manufacturer = db.Manufacturers.Find(NameManufacturer);
-                var ProductsOfManufacturer = from p in db.Products
-                                             where p.Manufacturer.ManufacturerName == NameManufacturer
-                                             select p;
-                Console.WriteLine("\nСписок товаров производителя {0}:", NameManufacturer);
+                var Manufacturer = Db.Manufacturers.Find(nameManufacturer);
+                var ProductsOfManufacturer = Db.Products.Where(p => p.Manufacturer.ManufacturerName == nameManufacturer)
+                    .Select(c=>c);
+                Console.WriteLine("\nСписок товаров производителя {0}:", nameManufacturer);
                 foreach (var Product in ProductsOfManufacturer)
                 {
                     Console.WriteLine("{0}", Product.ProductName);
@@ -113,19 +99,15 @@ namespace sportmaster_parser
             }
         }
 
-        private static void GetProductsWithSearch(string SearchQuery)
+        private static void GetProductsWithSearch(string searchQuery)
         {
-            StringBuilder url = new StringBuilder("http://www.sportmaster.ru/catalog/product/search.do?SearchQuery=");
-            url.Append(SearchQuery);
-            url.Append("&pageSize=120");
-            url.ToString();
-
+            // ЕСЛИ НЕ РАБОТАЕТ ПОИСК ПРОВЕРЬ ПЕРЕДАВАЕМЫЙ ПАРАМЕТР НА САЙТЕ СПОРТМАСТЕРА
+            string Url = "http://www.sportmaster.ru/catalog/product/search.do?text=" + searchQuery + "&pageSize=120";
             try
             {
-                HtmlWeb web = new HtmlWeb();
-                HtmlDocument htmldoc = web.Load(url.ToString());
-                HtmlNodeCollection Products =
-                    htmldoc.DocumentNode.SelectNodes("//div[@class=\"sm-category__item \"]/h2/a");
+                HtmlWeb Web = new HtmlWeb();
+                HtmlDocument HtmlDoc = Web.Load(Url);
+                HtmlNodeCollection Products = HtmlDoc.DocumentNode.SelectNodes("//div[@class=\"sm-category__item \"]/h2/a");
                 Console.WriteLine();
                 if (Products != null)
                 {
@@ -133,19 +115,18 @@ namespace sportmaster_parser
                         "ID", "Название товара");
                     foreach (HtmlNode Product in Products)
                     {
-                        int StartSymbolID = Product.Attributes["href"].Value.IndexOf("/product/") + 9;
-                        int EndSymbolID = Product.Attributes["href"].Value.Substring(StartSymbolID).IndexOf("/");
-                        string id = Product.Attributes["href"].Value.Substring(StartSymbolID, EndSymbolID);
-                        Console.WriteLine("{0, 8} | {1}", id, Product.InnerText);
+                        int StartSymbolId = Product.Attributes["href"].Value.IndexOf("/product/") + 9;
+                        int EndSymbolId = Product.Attributes["href"].Value.Substring(StartSymbolId).IndexOf("/");
+                        string Id = Product.Attributes["href"].Value.Substring(StartSymbolId, EndSymbolId);
+                        Console.WriteLine("{0, 8} | {1}", Id, Product.InnerText);
                     }
-
                 }
                 else
                 {
-                    Console.WriteLine("Не найдено ничего по запросу \"{0}\"", SearchQuery);
+                    Console.WriteLine("Не найдено ничего по запросу \"{0}\"", searchQuery);
                 }
             }
-            catch (WebException ex)
+            catch (WebException)
             {
                 Console.WriteLine("\nПроблемы с доступом к сайту");
             }
@@ -155,127 +136,90 @@ namespace sportmaster_parser
             }
         }
 
-        private static void GetProductFromID(string id)
+        private static void GetProductFromId(string id)
         {
             bool ProductHasCached = false;
-            using (var db = new LiteDatabase(@"cache.db"))
+            using (var Db = new LiteDatabase(@"cache.db"))
             {
-                var Products = db.GetCollection<CachedProduct>("products");
-                var result = Products.Find(x => x.SportmasterID.Equals(id));
-                ProductHasCached = result.Any();
-                if (ProductHasCached)
+                var Products = Db.GetCollection<CachedProduct>("products");
+                var Result = Products.FindOne(x => x.SportmasterId.Equals(id));
+                if (Result != null)
                 {
+                    ProductHasCached = true;
                     Console.WriteLine("\nИнформация о товаре получена из кэша");
-                    Products.FindOne(x => x.SportmasterID.Equals(id)).WriteProductInfo();
+                    WriteProductInfo(Result);
                 }
             }
             
             if (!ProductHasCached)
             {
-                StringBuilder url = new StringBuilder("http://www.sportmaster.ru/product/");
-                url.Append(id);
-                url.ToString();
+                string Url = "http://www.sportmaster.ru/product/" + id;
                 try
                 {
-                    HtmlWeb web = new HtmlWeb();
-                    HtmlDocument htmldoc = web.Load(url.ToString());
+                    HtmlWeb Web = new HtmlWeb();
+                    HtmlDocument HtmlDoc = Web.Load(Url);
                     HtmlNode NameProductNode =
-                        htmldoc.DocumentNode.SelectSingleNode("/html/body/div[4]/div[2]/div[2]/div[3]/h1");
+                        HtmlDoc.DocumentNode.SelectSingleNode("//h1[@itemprop='name']");
                     HtmlNode ManufacturerProductNode =
-                        htmldoc.DocumentNode.SelectSingleNode("/ html/body/div[4]/div[2]/div[2]/div[2]/div/div[1]/a/img");
+                        HtmlDoc.DocumentNode.SelectSingleNode("//div[@class='sm-goods_main_logo-holder']/a/img");
                     HtmlNode PriceProductNode =
-                        htmldoc.DocumentNode.SelectSingleNode(
-                            "/html/body/div[4]/div[2]/div[2]/div[3]/div[3]/div/div/div/div/text()");
-
+                        HtmlDoc.DocumentNode.SelectSingleNode("//meta[@itemprop='price']");
+                    
                     var NewCachedProduct = new CachedProduct()
                     {
-                        SportmasterID = id,
+                        SportmasterId = id,
                         Name = NameProductNode.InnerText,
                         Manufacturer = ManufacturerProductNode.Attributes["alt"].Value,
-                        Price = PriceProductNode.InnerText.Replace(",", "")
+                        Price = PriceProductNode.Attributes["content"].Value
                     };
+                    WriteProductInfo(NewCachedProduct);
 
-                    using (var db = new LiteDatabase(@"cache.db"))
+                    
+                    using (var Db = new LiteDatabase(@"cache.db"))
                     {
-                        var Products = db.GetCollection<CachedProduct>("products");
+                        var Products = Db.GetCollection<CachedProduct>("products");
                         Products.Insert(NewCachedProduct);
-                        NewCachedProduct.WriteProductInfo();
                     }
 
-                    using (var db = new ProductsContext())
+                    using (var Db = new ProductContext())
                     {
-                        var NewManufacturer = db.Manufacturers.Find(NewCachedProduct.Manufacturer);
+                        var NewManufacturer = Db.Manufacturers.Find(NewCachedProduct.Manufacturer);
                         if (NewManufacturer == null)
                         {
                             NewManufacturer = new Manufacturer()
                             {
                                 ManufacturerName = NewCachedProduct.Manufacturer
                             };
-                            db.Manufacturers.Add(NewManufacturer);
                         }
                         var NewProduct = new Product()
                         {
                             Manufacturer = NewManufacturer,
                             ProductName = NewCachedProduct.Name,
                             ProductPrice = NewCachedProduct.Price,
-                            SportmasterID = NewCachedProduct.SportmasterID
+                            SportmasterId = NewCachedProduct.SportmasterId
                         };
-                        db.Products.Add(NewProduct);
-                        db.SaveChanges();
+                        Db.Products.Add(NewProduct);
+                        Db.SaveChanges();
                     }
                 }
-                catch (WebException ex)
+                catch (WebException)
                 {
                     Console.WriteLine("\nПроблемы с доступом к сайту");
                 }
-                catch (Exception e)
+                catch (Exception)
                 {
                     Console.WriteLine("\nВозникла проблема при попытке извлечь информацию по ID: \"{0}\"", id);
                 }
             }
             Console.WriteLine("\n");
         }
-    }
 
-    public class Product
-    {
-        [Key]
-        public string SportmasterID { get; set; }
-        public string ProductName { get; set; }
-        public string ProductPrice { get; set; }
-
-
-        public virtual Manufacturer Manufacturer { get; set; }
-    }
-
-
-    public class Manufacturer
-    {
-        [Key]
-        public string ManufacturerName { get; set; }
-
-        public virtual ICollection<Product> Products { get; set; }
-    }
-
-    public class ProductsContext : DbContext
-    {
-        public DbSet<Product> Products { get; set; }
-        public DbSet<Manufacturer> Manufacturers { get; set; }
-    }
-
-    public class CachedProduct
-    {
-        public string SportmasterID { get; set; }
-        public string Name { get; set; }
-        public string Manufacturer { get; set; }
-        public string Price { get; set; }
-
-        public void WriteProductInfo()
+        private static void WriteProductInfo(CachedProduct product)
         {
             Console.WriteLine();
-            Console.WriteLine("{0, 15}: {1}", "Наименование", this.Name);
-            Console.WriteLine("{0, 15}: {1}", "Производитель", this.Manufacturer);
-            Console.WriteLine("{0, 15}: {1}", "Цена", this.Price);
+            Console.WriteLine("{0, 15}: {1}", "Наименование", product.Name);
+            Console.WriteLine("{0, 15}: {1}", "Производитель", product.Manufacturer);
+            Console.WriteLine("{0, 15}: {1}", "Цена", product.Price);
         }
     }
 }

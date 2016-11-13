@@ -1,0 +1,99 @@
+﻿<Window x:Class="window_sportmaster_parser.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:window_sportmaster_parser"
+        mc:Ignorable="d"
+        Title="Спортмастер" Height="600" Width="800">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"></RowDefinition>
+            <RowDefinition Height="23"></RowDefinition>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"></ColumnDefinition>
+            <ColumnDefinition Width="Auto"></ColumnDefinition>
+            <ColumnDefinition Width="*"></ColumnDefinition>
+        </Grid.ColumnDefinitions>
+        <Grid Grid.Column="0" Grid.Row="0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"></RowDefinition>
+                <RowDefinition Height="*"></RowDefinition>
+                <RowDefinition Height="Auto"></RowDefinition>
+            </Grid.RowDefinitions>
+            <Grid Grid.Row="0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"></ColumnDefinition>
+                    <ColumnDefinition Width="*"></ColumnDefinition>
+                    <ColumnDefinition Width="Auto"></ColumnDefinition>
+                </Grid.ColumnDefinitions>
+                <TextBlock Margin="2" Grid.Column="0" Grid.Row="0" Text="Поиск: "/>
+                <TextBox Margin="2" x:Name="SearchQuery" Grid.Column="1" Grid.Row="0" Text="" KeyDown="SearchQuery_KeyDown"/>
+                <Button Margin="2" Grid.Column="2" Grid.Row="0" Content="Найти" Click="Button_Click"/>
+            </Grid>
+            <ListView x:Name="ResultListView" Grid.Row="1" SelectionChanged="ResultListView_SelectionChanged">
+                <ListView.View>
+                    <GridView>
+                        <GridViewColumn DisplayMemberBinding="{Binding Path=SportmasterId}" Header="ID" Width="Auto"/>
+                        <GridViewColumn DisplayMemberBinding="{Binding Path=Name}" Header="Название товара" Width="Auto"/>
+                    </GridView>
+                </ListView.View>
+            </ListView>
+            <StackPanel Grid.Row="2" Margin="3">
+                <TextBlock Margin="1">Название :</TextBlock>
+                <TextBox Margin="1" Grid.Column="1" x:Name="SelectedName"></TextBox>
+                <TextBlock Margin="1" Grid.Row="1">Производитель:</TextBlock>
+                <TextBox Margin="1" Grid.Row="1" Grid.Column="1" x:Name="SelectedManufacturer"></TextBox>
+                <TextBlock Margin="1" Grid.Row="2">Цена (руб):</TextBlock>
+                <TextBox Margin="1" Grid.Row="2" Grid.Column="1" x:Name="SelectedPrice"></TextBox>
+            </StackPanel>
+        </Grid>
+        <GridSplitter Grid.Column="1"  Width="5"/>
+        <Grid Grid.Column="2" Grid.Row="0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"></RowDefinition>
+                <RowDefinition Height="*"></RowDefinition>
+            </Grid.RowDefinitions>
+            <Grid  Grid.Row="0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"></ColumnDefinition>
+                    <ColumnDefinition></ColumnDefinition>
+                </Grid.ColumnDefinitions>
+                <TextBlock Margin="2" Grid.Column="0" Text="Производитель: "/>
+                <ComboBox Margin="2" Grid.Column="1" Name="ManufacturerComboBox" SelectedIndex="0" SelectionChanged="ManufacturerComboBox_SelectionChanged" IsSynchronizedWithCurrentItem="True"/>
+            </Grid>
+
+            <ListView x:Name="ProductsOfManufacturerListView" Grid.Row="1">
+                <ListView.View>
+                    <GridView>
+                        <GridViewColumn DisplayMemberBinding="{Binding Path=ProductName}" Header="Название товара" Width="Auto"/>
+                        <GridViewColumn DisplayMemberBinding="{Binding Path=ProductPrice}" Header="Цена" Width="Auto"/>
+                    </GridView>
+                </ListView.View>
+            </ListView>
+        </Grid>
+        <StatusBar Grid.Column="0"  Grid.Row="1"  Grid.ColumnSpan="3">
+            <StatusBar.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"></ColumnDefinition>
+                            <ColumnDefinition Width="2*"></ColumnDefinition>
+                            <ColumnDefinition Width="*"></ColumnDefinition>
+                        </Grid.ColumnDefinitions>
+                    </Grid>
+                </ItemsPanelTemplate>
+            </StatusBar.ItemsPanel>
+            <StatusBarItem Grid.Column="0">
+                <TextBlock x:Name="CountSearch" TextAlignment="Left"/>
+            </StatusBarItem>
+            <StatusBarItem Grid.Column="1">
+                <TextBlock x:Name="MessageForUser" TextAlignment="Center"/>
+            </StatusBarItem>
+            <StatusBarItem Grid.Column="2">
+                <TextBlock x:Name="CountProductsOfManufacturer" TextAlignment="Right"/>
+            </StatusBarItem>
+        </StatusBar>
+    </Grid>
+</Window>

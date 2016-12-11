@@ -6,7 +6,10 @@
         xmlns:local="clr-namespace:window_sportmaster_parser"
         mc:Ignorable="d"
         Title="Спортмастер" Height="600" Width="800">
-    <Grid>
+    <Window.Resources>
+        <local:SportmasterViewModel x:Key="ViewModel"/>
+    </Window.Resources>
+    <Grid DataContext="{StaticResource ViewModel}">
         <Grid.RowDefinitions>
             <RowDefinition Height="*"></RowDefinition>
             <RowDefinition Height="23"></RowDefinition>
@@ -29,10 +32,10 @@
                     <ColumnDefinition Width="Auto"></ColumnDefinition>
                 </Grid.ColumnDefinitions>
                 <TextBlock Margin="2" Grid.Column="0" Grid.Row="0" Text="Поиск: "/>
-                <TextBox Margin="2" x:Name="SearchQuery" Grid.Column="1" Grid.Row="0" Text="" KeyDown="SearchQuery_KeyDown"/>
-                <Button Margin="2" Grid.Column="2" Grid.Row="0" Content="Найти" Click="Button_Click"/>
+                <TextBox Margin="2" Grid.Column="1" Grid.Row="0" Text="{Binding SearchQuery, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                <Button Margin="2" Grid.Column="2" Grid.Row="0" Content="Найти" Command="{Binding SearchProductCommand}"/>
             </Grid>
-            <ListView x:Name="ResultListView" Grid.Row="1" SelectionChanged="ResultListView_SelectionChanged">
+            <ListView Grid.Row="1" ItemsSource="{Binding SearchResult, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"  SelectedItem="{Binding SelectedProduct, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" >
                 <ListView.View>
                     <GridView>
                         <GridViewColumn DisplayMemberBinding="{Binding Path=SportmasterId}" Header="ID" Width="Auto"/>
@@ -42,14 +45,14 @@
             </ListView>
             <StackPanel Grid.Row="2" Margin="3">
                 <TextBlock Margin="1">Название :</TextBlock>
-                <TextBox Margin="1" Grid.Column="1" x:Name="SelectedName"></TextBox>
-                <TextBlock Margin="1" Grid.Row="1">Производитель:</TextBlock>
-                <TextBox Margin="1" Grid.Row="1" Grid.Column="1" x:Name="SelectedManufacturer"></TextBox>
-                <TextBlock Margin="1" Grid.Row="2">Цена (руб):</TextBlock>
-                <TextBox Margin="1" Grid.Row="2" Grid.Column="1" x:Name="SelectedPrice"></TextBox>
+                <TextBox Margin="1" Text="{Binding DisplayedProduct.ProductName}" />
+                <TextBlock Margin="1">Производитель:</TextBlock>
+                <TextBox Margin="1" Text="{Binding DisplayedProduct.Manufacturer.ManufacturerName}" />
+                <TextBlock Margin="1">Цена (руб):</TextBlock>
+                <TextBox Margin="1" Text="{Binding DisplayedProduct.ProductPrice}" />
             </StackPanel>
         </Grid>
-        <GridSplitter Grid.Column="1"  Width="5"/>
+        <GridSplitter Grid.Row="0" Grid.Column="1"  Width="5"/>
         <Grid Grid.Column="2" Grid.Row="0">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"></RowDefinition>
@@ -61,10 +64,9 @@
                     <ColumnDefinition></ColumnDefinition>
                 </Grid.ColumnDefinitions>
                 <TextBlock Margin="2" Grid.Column="0" Text="Производитель: "/>
-                <ComboBox Margin="2" Grid.Column="1" Name="ManufacturerComboBox" SelectedIndex="0" SelectionChanged="ManufacturerComboBox_SelectionChanged" IsSynchronizedWithCurrentItem="True"/>
+                <ComboBox Margin="2" Grid.Column="1" ItemsSource="{Binding Manufacturers, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" DisplayMemberPath="ManufacturerName" SelectedItem="{Binding SelectedManufacturer, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
             </Grid>
-
-            <ListView x:Name="ProductsOfManufacturerListView" Grid.Row="1">
+            <ListView Grid.Row="1" ItemsSource="{Binding ProductsOfManufacturer, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
                 <ListView.View>
                     <GridView>
                         <GridViewColumn DisplayMemberBinding="{Binding Path=ProductName}" Header="Название товара" Width="Auto"/>
@@ -86,14 +88,29 @@
                 </ItemsPanelTemplate>
             </StatusBar.ItemsPanel>
             <StatusBarItem Grid.Column="0">
-                <TextBlock x:Name="CountSearch" TextAlignment="Left"/>
+                <TextBlock Text="{Binding CountSearchResults, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" TextAlignment="Left"/>
             </StatusBarItem>
-            <StatusBarItem Grid.Column="1">
-                <TextBlock x:Name="MessageForUser" TextAlignment="Center"/>
+            <StatusBarItem Grid.Column="1" HorizontalAlignment="Center">
+                <ProgressBar Height="20" MinWidth="250" IsIndeterminate="{Binding IsExecuteParsing, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
             </StatusBarItem>
             <StatusBarItem Grid.Column="2">
-                <TextBlock x:Name="CountProductsOfManufacturer" TextAlignment="Right"/>
+                <TextBlock Text="{Binding CountProductsOfManufacturer, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, StringFormat={}}" TextAlignment="Right"/>
             </StatusBarItem>
         </StatusBar>
     </Grid>
 </Window>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

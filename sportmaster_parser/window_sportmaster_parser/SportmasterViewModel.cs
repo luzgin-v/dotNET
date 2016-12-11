@@ -3,7 +3,6 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Net;
-using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
@@ -51,17 +50,6 @@ namespace window_sportmaster_parser
         {
             get
             {
-                //if (_searchProductCommand == null)
-                //{
-                //    _searchProductCommand = new AsyncDelegateCommand(GetProductsWithSearchAsync);
-                //}
-                //return _searchProductCommand;
-
-                //return _searchProductCommand ?? (_searchProductCommand = new RelayCommand(() =>
-                //{
-                //    SearchResult = new ObservableCollection<ProductOfSearch>(SportmasterParserFunctions.GetProductsWithSearch(SearchQuery));
-                //}));
-                
                 return _searchProductCommand ?? (_searchProductCommand = new RelayCommand(async () =>
                 {
                     await Task.Run(() => GetProductsWithSearch());
@@ -77,9 +65,7 @@ namespace window_sportmaster_parser
             {
                 _selectedProduct = value;
                 RaisePropertyChanged("SelectedProduct");
-                IsExecuteParsing = true;
                 Task.Run(() => GetProductFromId());
-                IsExecuteParsing = false;
             }
         }
 
@@ -91,6 +77,7 @@ namespace window_sportmaster_parser
             {
                 _displayedProduct = value;
                 RaisePropertyChanged("DisplayedProduct");
+                AddFieldToDb();
             }
         }
 
@@ -124,8 +111,8 @@ namespace window_sportmaster_parser
             {
                 _selectedManufacturer = value;
                 RaisePropertyChanged("SelectedManufacturer");
-                ProductsOfManufacturer = new ObservableCollection<Product>(_context.Products.Where(p => p.Manufacturer.ManufacturerName == _selectedManufacturer.ManufacturerName).Select(c => c).ToList());
-                CountProductsOfManufacturer = "Всего: " + ProductsOfManufacturer.Count.ToString();
+                FillProductsOfManufacturer();
+                CountProductsOfManufacturer = ProductsOfManufacturer.Count.ToString();
             }
         }
 
@@ -164,27 +151,27 @@ namespace window_sportmaster_parser
 
         public void GetProductsWithSearch()
         {
-            string Url = "http://www.sportmaster.ru/catalog/product/search.do?text=" + _searchQuery + "&pageSize=120";
-            ObservableCollection<ProductOfSearch> ResultSearch = new ObservableCollection<ProductOfSearch>();
+            string url = "http://www.sportmaster.ru/catalog/product/search.do?text=" + _searchQuery + "&pageSize=120";
+            ObservableCollection<ProductOfSearch> resultSearch = new ObservableCollection<ProductOfSearch>();
             IsExecuteParsing = true;
             try
             {
-                HtmlWeb Web = new HtmlWeb();
-                HtmlDocument HtmlDoc = Web.Load(Url);
-                HtmlNodeCollection Products = HtmlDoc.DocumentNode.SelectNodes("//div[@class=\"sm-category__item \"]/h2/a");
-                if (Products != null)
+                HtmlWeb web = new HtmlWeb();
+                HtmlDocument htmlDoc = web.Load(url);
+                HtmlNodeCollection products = htmlDoc.DocumentNode.SelectNodes("//div[@class=\"sm-category__item \"]/h2/a");
+                if (products != null)
                 {
-                    foreach (HtmlNode Product in Products)
+                    foreach (HtmlNode product in products)
                     {
-                        int StartSymbolId = Product.Attributes["href"].Value.IndexOf("/product/", StringComparison.Ordinal) + 9;
-                        int EndSymbolId = Product.Attributes["href"].Value.Substring(StartSymbolId).IndexOf("/", StringComparison.Ordinal);
-                        string Id = Product.Attributes["href"].Value.Substring(StartSymbolId, EndSymbolId);
-                        ProductOfSearch NewProduct = new ProductOfSearch
+                        int startSymbolId = product.Attributes["href"].Value.IndexOf("/product/", StringComparison.Ordinal) + 9;
+                        int endSymbolId = product.Attributes["href"].Value.Substring(startSymbolId).IndexOf("/", StringComparison.Ordinal);
+                        string id = product.Attributes["href"].Value.Substring(startSymbolId, endSymbolId);
+                        var newProduct = new ProductOfSearch
                         {
-                            Name = Product.InnerText,
-                            SportmasterId = Id
+                            Name = product.InnerText,
+                            SportmasterId = id
                         };
-                        ResultSearch.Add(NewProduct);
+                        resultSearch.Add(newProduct);
                     }
                 }
                 else
@@ -197,71 +184,84 @@ namespace window_sportmaster_parser
                 MessageBox.Show("Проблемы с доступом к сайту");
             }
             IsExecuteParsing = false;
-            SearchResult = ResultSearch;
+            SearchResult = resultSearch;
             SelectedProduct = null;
-            CountSearchResults = "Всего: " + SearchResult.Count.ToString();
+            CountSearchResults = SearchResult.Count.ToString();
         }
-
+      
         public void GetProductFromId()
         {
             if (_selectedProduct != null)
             {
                 IsExecuteParsing = true;
-                string Url = "http://www.sportmaster.ru/product/" + _selectedProduct.SportmasterId;
+                string url = "http://www.sportmaster.ru/product/" + _selectedProduct.SportmasterId;
                 try
                 {
-                    HtmlWeb Web = new HtmlWeb();
-                    HtmlDocument HtmlDoc = Web.Load(Url);
-                    HtmlNode NameProductNode =
-                        HtmlDoc.DocumentNode.SelectSingleNode("//h1[@itemprop='name']");
-                    HtmlNode ManufacturerProductNode =
-                        HtmlDoc.DocumentNode.SelectSingleNode("//div[@class='sm-goods_main_logo-holder']/a/img");
-                    HtmlNode PriceProductNode =
-                        HtmlDoc.DocumentNode.SelectSingleNode("//meta[@itemprop='price']");
-                    Product NewProduct;
-
-                    var NewManufacturer = _context.Manufacturers.Find(ManufacturerProductNode.Attributes["alt"].Value);
-                    if (NewManufacturer == null)
+                    HtmlWeb web = new HtmlWeb();
+                    HtmlDocument htmlDoc = web.Load(url);
+                    HtmlNode nameProductNode =
+                        htmlDoc.DocumentNode.SelectSingleNode("//h1[@itemprop='name']");
+                    HtmlNode manufacturerProductNode =
+                        htmlDoc.DocumentNode.SelectSingleNode("//div[@class='sm-goods_main_logo-holder']/a/img");
+                    HtmlNode priceProductNode =
+                        htmlDoc.DocumentNode.SelectSingleNode("//meta[@itemprop='price']");
+                    var newProduct = new Product
                     {
-                        NewManufacturer = new Manufacturer
+                        Manufacturer = new Manufacturer()
                         {
-                            ManufacturerName = ManufacturerProductNode.Attributes["alt"].Value
-                        };
-                        _context.Manufacturers.Add(NewManufacturer);
-                        _context.SaveChanges();
-                        Manufacturers = new ObservableCollection<Manufacturer>(_context.Manufacturers.ToList());
-                    }
-                    NewProduct = new Product
-                    {
-                        Manufacturer = NewManufacturer,
-                        ProductName = NameProductNode.InnerText,
-                        ProductPrice = PriceProductNode.Attributes["content"].Value,
+                            ManufacturerName = manufacturerProductNode.Attributes["alt"].Value
+                        },
+                        ProductName = nameProductNode.InnerText,
+                        ProductPrice = priceProductNode.Attributes["content"].Value,
                         SportmasterId = _selectedProduct.SportmasterId
                     };
-                    if (! _context.Products.Where(p => p.SportmasterId == _selectedProduct.SportmasterId).Select(c => c).Any())
-                    {
-                        _context.Products.Add(NewProduct);
-                        _context.SaveChanges();
-                    }
-                    DisplayedProduct = NewProduct;
-                }
+                    DisplayedProduct = newProduct;
+            }
                 catch (WebException)
-                {
-                    MessageBox.Show("Проблемы с доступом к сайту");
-                }
-                catch (Exception e)
-                {
-                    MessageBox.Show("Возникла проблема при попытке извлечь информацию по ID: \"" + _selectedProduct.SportmasterId + "\"");
-                }
-                IsExecuteParsing = false;
+            {
+                MessageBox.Show("Проблемы с доступом к сайту");
+            }
+            catch (Exception)
+            {
+                MessageBox.Show("Возникла проблема при попытке извлечь информацию по ID: \"" + _selectedProduct.SportmasterId + "\"");
+            }
+            IsExecuteParsing = false;
             }
         }
 
-        //public void RaisePropertyChanged([CallerMemberName]string propertyName = "")
-        //{
-        //    if (PropertyChanged != null)
-        //        PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
-        //}
+        public void AddFieldToDb()
+        {
+            if (_selectedProduct != null)
+            {
+                var newManufacturer = _context.Manufacturers.Find(_displayedProduct.Manufacturer.ManufacturerName);
+                if (newManufacturer == null)
+                {
+                    newManufacturer = new Manufacturer
+                    {
+                        ManufacturerName = _displayedProduct.Manufacturer.ManufacturerName
+                    };
+                    _context.Manufacturers.Add(newManufacturer);
+                    _context.SaveChanges();
+                    Manufacturers = new ObservableCollection<Manufacturer>(_context.Manufacturers.ToList());
+                }
+                var newProduct = _displayedProduct;
+                newProduct.Manufacturer = newManufacturer;
+                if (
+                    !_context.Products.Where(p => p.SportmasterId == _displayedProduct.SportmasterId)
+                        .Select(c => c)
+                        .Any())
+                {
+                    _context.Products.Add(newProduct);
+                    _context.SaveChanges();
+                }
+            }
+        }
+
+        public void FillProductsOfManufacturer()
+        {
+            ProductsOfManufacturer = new ObservableCollection<Product>(_context.Products.Where(p => p.Manufacturer.ManufacturerName == _selectedManufacturer.ManufacturerName).Select(c => c).ToList());
+
+        }
 
         private void RaisePropertyChanged(string propertyName)
         {

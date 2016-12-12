@@ -88,6 +88,8 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="SportmasterDbController.cs" />
+    <Compile Include="SportmasterParseController.cs" />
     <Compile Include="SportmasterViewModel.cs" />
     <Compile Include="SportmasterModel.cs" />
     <Page Include="SportmasterView.xaml">

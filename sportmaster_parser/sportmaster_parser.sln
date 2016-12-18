@@ -7,6 +7,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "sportmaster_parser", "sport
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "window_sportmaster_parser", "window_sportmaster_parser\window_sportmaster_parser.csproj", "{79805F2D-CBF3-44FD-9CB3-2706D6B33C5C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "webAPI_sportmaster_parser", "webAPI_sportmaster_parser\webAPI_sportmaster_parser.csproj", "{AFCC8FF6-EBF5-43C7-8079-6B30920420FD}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WcfSportmaster", "..\WcfSportmaster\WcfSportmaster\WcfSportmaster.csproj", "{90073278-ED72-4563-83F9-A596B8320376}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -14,13 +18,18 @@ Global
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{1B9F0EE5-9E21-4107-A3B7-B37A5245EB97}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{1B9F0EE5-9E21-4107-A3B7-B37A5245EB97}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1B9F0EE5-9E21-4107-A3B7-B37A5245EB97}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1B9F0EE5-9E21-4107-A3B7-B37A5245EB97}.Release|Any CPU.Build.0 = Release|Any CPU
 		{79805F2D-CBF3-44FD-9CB3-2706D6B33C5C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{79805F2D-CBF3-44FD-9CB3-2706D6B33C5C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{79805F2D-CBF3-44FD-9CB3-2706D6B33C5C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{79805F2D-CBF3-44FD-9CB3-2706D6B33C5C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AFCC8FF6-EBF5-43C7-8079-6B30920420FD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AFCC8FF6-EBF5-43C7-8079-6B30920420FD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AFCC8FF6-EBF5-43C7-8079-6B30920420FD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{90073278-ED72-4563-83F9-A596B8320376}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{90073278-ED72-4563-83F9-A596B8320376}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{90073278-ED72-4563-83F9-A596B8320376}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{90073278-ED72-4563-83F9-A596B8320376}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

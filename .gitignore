@@ -243,4 +243,5 @@ ModelManifest.xml
 
 # FAKE - F# Make
 .fake/
+/sportmaster_parser/wcf_sportmaster_parser
 /sportmaster_parser/webAPI_sportmaster_parser/cache.db

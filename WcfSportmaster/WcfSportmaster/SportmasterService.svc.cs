@@ -9,7 +9,7 @@
 
         public SportmasterModel.CachedProduct GetProductById(string id)
         {
-            return SportmasterDbController.GetCachedProduct(id);
+            return SportmasterParseController.GetProductFromId(id);
         }
     }
 }

@@ -124,12 +124,13 @@
   <ItemGroup>
     <Compile Include="App_Start\WebApiConfig.cs" />
     <Compile Include="Controllers\SportmasterController.cs" />
-    <Compile Include="Controllers\SportmasterDbController.cs" />
+    <Compile Include="Models\SportmasterDbController.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
     <Compile Include="Models\CachedProduct.cs" />
     <Compile Include="Models\ProductOfSearch.cs" />
+    <Compile Include="Models\SportmasterParseController.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

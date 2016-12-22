@@ -1,7 +1,6 @@
 ﻿using LiteDB;
-using webAPI_sportmaster_parser.Models;
 
-namespace webAPI_sportmaster_parser.Controllers
+namespace webAPI_sportmaster_parser.Models
 {
     public class SportmasterDbController
     {

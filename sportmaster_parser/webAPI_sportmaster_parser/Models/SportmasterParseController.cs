@@ -3,14 +3,14 @@ using System.Collections.Generic;
 using System.Net;
 using HtmlAgilityPack;
 
-namespace WcfSportmaster
+namespace webAPI_sportmaster_parser.Models
 {
     public static class SportmasterParseController
     {
-        public static List<SportmasterModel.ProductOfSearch> GetProductsWithSearch(string searchQuery)
+        public static List<ProductOfSearch> GetProductsWithSearch(string searchQuery)
         {
             _url = "http://www.sportmaster.ru/catalog/product/search.do?text=" + searchQuery + "&pageSize=120";
-            List<SportmasterModel.ProductOfSearch> resultSearch = new List<SportmasterModel.ProductOfSearch>();
+            List<ProductOfSearch> resultSearch = new List<ProductOfSearch>();
             try
             {
                 GetWebPage();
@@ -22,7 +22,7 @@ namespace WcfSportmaster
                         int startSymbolId = product.Attributes["href"].Value.IndexOf("/product/", StringComparison.Ordinal) + 9;
                         int endSymbolId = product.Attributes["href"].Value.Substring(startSymbolId).IndexOf("/", StringComparison.Ordinal);
                         string id = product.Attributes["href"].Value.Substring(startSymbolId, endSymbolId);
-                        var newProduct = new SportmasterModel.ProductOfSearch
+                        var newProduct = new ProductOfSearch
                         {
                             Name = product.InnerText,
                             SportmasterId = id
@@ -42,7 +42,7 @@ namespace WcfSportmaster
             return resultSearch;
         }
 
-        public static SportmasterModel.CachedProduct GetProductFromId(string id)
+        public static CachedProduct GetProductFromId(string id)
         {
             var newProduct = SportmasterDbController.GetCachedProduct(id);
             if (newProduct == null)
@@ -57,7 +57,7 @@ namespace WcfSportmaster
                         _page.DocumentNode.SelectSingleNode("//div[@class='sm-goods_main_logo-holder']/a/img");
                     HtmlNode priceProductNode =
                         _page.DocumentNode.SelectSingleNode("//meta[@itemprop='price']");
-                    newProduct = new SportmasterModel.CachedProduct()
+                    newProduct = new CachedProduct()
                     {
                         Manufacturer = manufacturerProductNode.Attributes["alt"].Value,
                         Name = nameProductNode.InnerText,

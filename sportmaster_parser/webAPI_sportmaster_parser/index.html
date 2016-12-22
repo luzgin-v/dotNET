@@ -37,6 +37,9 @@
                 $.each(data, function (key, item) {
                     $('<li>', { text: formatSearchProd(item) }).appendTo($('#products'));
                 });
+            })
+            .fail(function (jqXHR, textStatus, err) {
+                $('<li>', { text: err}).appendTo($('#products'));
             });
 
     }
